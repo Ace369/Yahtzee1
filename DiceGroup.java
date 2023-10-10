@@ -42,12 +42,28 @@ public class DiceGroup {
 	 *  @param rawHold	the numbered dice to hold
 	 */
 	public void rollDice(String rawHold) {
-		for(int i = 0; i < 5; i++){
+	/*	for(int i = 0; i < 5; i++){
 			for(int j = 0; j < rawHold.length(); j++){
 				char currentChar = rawHold.charAt(j);
 				if(!(currentChar == i - 48)){
 					die[i].roll();
 				}
+			}
+		}
+		*/
+		boolean [] held = new boolean[5];
+		for(int i = 0; i < 5; i++){
+			for(int j = 0; j < rawHold.length(); j++){
+				char currentChar = rawHold.charAt(j);
+				if(currentChar == i + 49){
+					held[i] = true;
+					j = rawHold.length();
+				}
+			}
+		}
+		for(int k = 0; k < 5; k++){
+			if(!held[k]){
+				die[k].roll();
 			}
 		}
 	}
