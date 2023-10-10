@@ -7,9 +7,9 @@
  
 public class Yahtzee {
 	
-	private YahtzeePlayer player1; //
-	private YahtzeePlayer player2; //
-	private DiceGroup dice;
+	private YahtzeePlayer player1; //holds player 1 data
+	private YahtzeePlayer player2; //holds player 2 data
+	private DiceGroup dice;//group of 5 dice
 	
 	public Yahtzee(){
 		player1 = new YahtzeePlayer();
@@ -51,6 +51,7 @@ public class Yahtzee {
 		System.out.println("\n\n");
 	}
 	
+	/**Prompts players and stores thier names in FVs*/
 	public void setPlayerNames(){
 		String name1 = Prompt.getString("Player 1, please enter your first name ");
 		String name2 = Prompt.getString("Player 2, please enter your first name ");
@@ -58,25 +59,29 @@ public class Yahtzee {
 		player2.setName(name2);
 	}
 	
+	/**Rolls dice for each player, determining who goes first based on who rolled the highest
+	 * @return first - int that determines if first player is 1 or 2*/
 	public int determineFirst(){
 		int first = 0;
 		int score1 = 0;
 		int score2 = 0;
 		
 		while(score1 == score2){
+			if(score1 != 0){
+				System.out.println("Whoops, we have a tie (both rolled " + score1
+					+ "). Looks like we'll have to try that again . . .");
+			}
 			String empty = Prompt.getString("Let's see who will go first. " + player1.getName()
 			 + ", please hit enter to roll the dice");
 			dice.rollDice();
 			score1 = dice.getTotal();
 			dice.printDice();
-			System.out.println(score1);
 			
 			empty = Prompt.getString("Let's see who will go first. " + player2.getName()
 			 + ", please hit enter to roll the dice");
 			dice.rollDice();
 			score2 = dice.getTotal();
 			dice.printDice();
-			System.out.println(score2);
 		}
 		
 		String starterName = "";
@@ -93,15 +98,81 @@ public class Yahtzee {
 			score1 + ", and " + player2.getName() + ", you rolled a sum of "
 			+ score2);
 		System.out.println(starterName + ", since your score was higher, you'll roll first.");
-		
+		printScoreCard();
 		return first;
 	}
 	
+	/**Calls on the playerPlay methods after determining who goes first, looped 13 times*/
 	public void play(int starter){
 		for(int i = 1; i <= 13; i++){
-			player1.getScoreCard().printCardHeader();
-			player1.getScoreCard().printPlayerScore();
-			player2.getScoreCard().printPlayerScore();
+			
+			System.out.println("Round " + i + " of 13 rounds.");
+			if(starter == 1){
+				playerPlay(1);
+				playerPlay(2);
+			}
+			else{
+				playerPlay(2);
+				playerPlay(1);
+			}
+			
+
 		}
+	}
+	
+	/**Prints the scorecards*/
+	public void printScoreCard(){
+		player1.getScoreCard().printCardHeader();
+		player1.getScoreCard().printPlayerScore(player1);
+		player2.getScoreCard().printPlayerScore(player2);
+	}
+	
+	/**Player rolls the dice, and then depending on the input, can re-roll
+	 * some dice up to 2 times. After the dice are finalized, the scorecard is printed
+	 * and the score is added based on the player's choice
+	 * @param player - int determining which player is rolling */
+	public void playerPlay(int player){
+			String blank = "";
+			int choice = 0;
+			if(player == 1){
+				blank = Prompt.getString(player1.getName() + ", it's your turn to play. Please hit enter to roll the dice ");
+			}
+			else{
+				blank = Prompt.getString(player2.getName() + ", it's your turn to play. Please hit enter to roll the dice ");
+			}
+			
+			dice.rollDice();
+			dice.printDice();
+			
+			for(int k = 0; k < 2; k++){
+				String hold = Prompt.getString("Which di(c)e would you like to keep? Enter " + 
+					"the values you'd like to 'hold' without spaces. For examples, " + 
+					"if you'd like to 'hold' die 1, 2, and 5, enter 125 " + 
+					"(enter -1 if you'd like to end the turn) : -1");
+				if(hold.contains("-1")){
+					k = 2;
+				}
+				else{
+					dice.rollDice(hold);
+					dice.printDice();
+				}
+			}
+			printScoreCard();
+			if(player == 1){
+				choice = Prompt.getInt(player1.getName() + ", now you need to make a choice. Pick a valid integer from the list above ");
+				while (!(player1.getScoreCard().changeScore(choice, dice))){
+					System.out.println("This choice was already taken.");
+					choice = Prompt.getInt(player1.getName() + ", now you need to make a choice. Pick a valid integer from the list above ");
+				}
+			}
+			else{
+				choice = Prompt.getInt(player2.getName() + ", now you need to make a choice. Pick a valid integer from the list above ");
+				while (!(player2.getScoreCard().changeScore(choice, dice))){
+					System.out.println("This choice was already taken.");
+					choice = Prompt.getInt(player2.getName() + ", now you need to make a choice. Pick a valid integer from the list above ");
+				}
+			}
+			
+			printScoreCard();
 	}
 }
